@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="theme-color" content="#2c0a0a">
+    <title>🩸 血契祭坛 · 诅咒密语生成器 🩸</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: #0a0202;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Courier New', 'Segoe UI', 'Monaco', monospace;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: radial-gradient(circle at 20% 40%, rgba(120, 0, 0, 0.3) 2%, transparent 2.5%), radial-gradient(circle at 80% 70%, rgba(180, 0, 0, 0.4) 3%, transparent 3.5%), repeating-linear-gradient(45deg, rgba(80, 0, 0, 0.2) 0px, rgba(80, 0, 0, 0.2) 2px, transparent 2px, transparent 8px);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .card {
+            background: rgba(10, 2, 2, 0.94);
+            backdrop-filter: blur(3px);
+            border-radius: 20px;
+            border: 2px solid #6a0e0e;
+            box-shadow: 0 0 0 4px rgba(110, 0, 0, 0.5), 0 20px 35px rgba(0, 0, 0, 0.7), inset 0 0 20px rgba(255, 0, 0, 0.2);
+            width: 100%;
+            max-width: 580px;
+            padding: 2rem 1.8rem 2.2rem;
+            position: relative;
+            z-index: 2;
+            opacity: 0;
+            transform: scale(0.96) translateY(10px);
+            transition: opacity 0.4s cubic-bezier(0.2, 1.2, 0.3, 1), transform 0.35s ease;
+            pointer-events: none;
+        }
+
+        .card.active {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+            pointer-events: auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 28px;
+            border-bottom: 2px dashed #8b1a1a;
+            padding-bottom: 16px;
+        }
+
+        .skull-icon {
+            font-size: 58px;
+            filter: drop-shadow(0 0 6px #ff3300);
+            animation: shakeTremor 1.2s infinite ease;
+            display: inline-block;
+            color: #a52222;
+        }
+
+        @keyframes shakeTremor {
+
+            0%,
+            100% {
+                transform: translate(0px, 0px) rotate(0deg);
+            }
+
+            25% {
+                transform: translate(1px, -1px) rotate(0.5deg);
+            }
+
+            75% {
+                transform: translate(-1px, 1px) rotate(-0.5deg);
+            }
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #d64545, #6a040f, #a51b1b);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: 2px;
+        }
+
+        .sub {
+            font-size: 0.75rem;
+            background: #1f0404;
+            display: inline-block;
+            padding: 4px 18px;
+            border-radius: 20px;
+            margin-top: 12px;
+            font-weight: bold;
+            color: #bd7a7a;
+            border: 1px solid #a53f3f;
+        }
+
+        .input-group {
+            margin-bottom: 28px;
+        }
+
+        .input-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 800;
+            color: #ba6b6b;
+            margin-bottom: 10px;
+        }
+
+        .clear-btn {
+            background: #2a0606;
+            border: 1px solid #881010;
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: #e69999;
+            cursor: pointer;
+        }
+
+        .username-input {
+            width: 100%;
+            padding: 14px 20px;
+            font-size: 1rem;
+            border: 2px solid #770f0f;
+            border-radius: 20px;
+            background: #130303;
+            color: #e6b4b4;
+            font-family: monospace;
+        }
+
+        .date-badge {
+            background: #1f0404dd;
+            border-radius: 20px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 28px;
+            border: 1px solid #a21a1a;
+        }
+
+        .date-info {
+            background: #030000;
+            padding: 7px 18px;
+            border-radius: 40px;
+            color: #dc7f7f;
+            font-weight: bold;
+        }
+
+        .refresh-date-btn {
+            background: #611111;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 40px;
+            color: #f5c2c2;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .password-area {
+            background: #0e0101f2;
+            border-radius: 24px;
+            padding: 20px;
+            margin-bottom: 28px;
+            border: 2px solid #8c2c2c;
+            box-shadow: inset 0 0 20px #3c0000;
+        }
+
+        .password-value {
+            font-family: monospace;
+            font-size: 0.95rem;
+            word-break: break-all;
+            background: #000000aa;
+            padding: 16px;
+            border-radius: 20px;
+            color: #e64949;
+            font-weight: bold;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 14px 8px;
+            border-radius: 30px;
+            font-weight: bold;
+            background: #1e0505;
+            color: #dd9393;
+            border: 1px solid #972828;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(145deg, #831d1d, #4a0404);
+            color: #ffc5c5;
+        }
+
+        .btn:active {
+            transform: translateY(2px);
+        }
+
+        footer {
+            text-align: center;
+            font-size: 0.6rem;
+            color: #7f4b4b;
+            margin-top: 18px;
+        }
+
+        .custom-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            visibility: hidden;
+            opacity: 0;
+            transition: all 0.2s;
+        }
+
+        .custom-modal.show {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .modal-overlay {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: rgba(20, 0, 0, 0.85);
+            backdrop-filter: blur(6px);
+        }
+
+        .modal-content {
+            position: relative;
+            background: #1b0303;
+            max-width: 300px;
+            width: 80%;
+            padding: 32px 20px;
+            border-radius: 32px;
+            text-align: center;
+            border: 2px solid #b33b3b;
+        }
+
+        .modal-message {
+            color: #de8b8b;
+            font-weight: bold;
+            margin: 16px 0;
+        }
+
+        .modal-close {
+            background: #580e0e;
+            border: none;
+            padding: 9px 22px;
+            border-radius: 40px;
+            color: #fbcdcd;
+            cursor: pointer;
+        }
+
+        .verify-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.97);
+            backdrop-filter: blur(12px);
+            z-index: 20000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .verify-card {
+            background: #140101;
+            border-radius: 32px;
+            max-width: 700px;
+            width: 100%;
+            padding: 1.8rem;
+            text-align: center;
+            border: 3px solid #9a1f1f;
+            box-shadow: 0 0 0 4px #3a0303;
+        }
+
+        .verify-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #c04747;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .progress-status {
+            color: #b95a5a;
+            margin-bottom: 20px;
+            font-weight: bold;
+            border-bottom: 1px dashed #8b2a2a;
+            display: inline-block;
+            padding-bottom: 6px;
+        }
+
+        .sudoku-grid {
+            display: grid;
+            grid-template-columns: repeat(9, 1fr);
+            background-color: #2c0a0a;
+            border: 3px solid #5e1212;
+            margin: 20px auto;
+            aspect-ratio: 1 / 1;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        .sudoku-cell {
+            border: 1px solid #631212;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            background-color: #1c0404;
+            color: #dd8a8a;
+            font-size: 1.2rem;
+            position: relative;
+        }
+
+        .sudoku-cell.fixed {
+            background-color: #2f0808;
+            color: #e6aaaa;
+            font-weight: 800;
+        }
+
+        .sudoku-cell.editable {
+            background-color: #330a0a;
+            cursor: pointer;
+        }
+
+        .sudoku-cell.editable input {
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            background: transparent;
+            border: none;
+            color: #ff6060;
+            font-size: 1.2rem;
+            font-weight: bold;
+            font-family: monospace;
+            outline: none;
+        }
+
+        .error-badge {
+            color: #d64545;
+            font-size: 0.9rem;
+            margin: 8px 0;
+            font-weight: bold;
+        }
+
+        .verify-actions {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .blood-btn {
+            background: #520c0c;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 40px;
+            color: #ffc2c2;
+            font-weight: bold;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .toast-msg {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #a12222dd;
+            backdrop-filter: blur(12px);
+            color: #ffc7c7;
+            padding: 12px 24px;
+            border-radius: 40px;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+            z-index: 10001;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 550px) {
+            .sudoku-cell input {
+                font-size: 0.8rem;
+            }
+
+            .sudoku-cell {
+                font-size: 0.9rem;
+            }
+
+            .verify-card {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card" id="mainCard">
+        <div class="header">
+            <div class="skull-icon"><i class="fas fa-skull"></i> <i class="fas fa-droplet"></i> <i class="fas fa-khanda"></i></div>
+            <h1>血契祭坛 · 诅咒密令</h1>
+            <div class="sub"><i class="fas fa-scroll"></i> 每日只属于献祭者的黑暗秘语 <i class="fas fa-dagger"></i></div>
+        </div>
+        <div class="input-group">
+            <div class="input-label"><i class="fas fa-tint"></i> 罪孽之名（代号）</div>
+            <input type="text" id="usernameInput" class="username-input" placeholder="例: 血蔷薇 / 噬魂者" autocomplete="off">
+            <div style="text-align:right; margin-top:8px;">
+                <button id="clearMemoryBtn" class="clear-btn" type="button"><i class="fas fa-trash-alt"></i> 清除血祭记忆</button>
+            </div>
+        </div>
+        <div class="date-badge">
+            <div class="date-info"><i class="fas fa-calendar-alt"></i> 血日祭典 <strong id="todayDateDisplay">----</strong></div>
+            <button id="refreshDateBtn" class="refresh-date-btn"><i class="fas fa-sync-alt"></i> 唤醒诅咒密令</button>
+        </div>
+        <div class="password-area">
+            <div class="password-value" id="passwordDisplay">💀 献上祭品之名后显现 💀</div>
+        </div>
+        <div class="button-group">
+            <button id="copyBtn" class="btn btn-primary"><i class="fas fa-copy"></i> 镌刻密文</button>
+            <button id="manualGenBtn" class="btn"><i class="fas fa-skull"></i> 唤灵 / 同步</button>
+        </div>
+        <footer><i class="fas fa-moon"></i> 每日子夜密文都会异变 · 触碰溅血 <i class="fas fa-hand-peace"></i></footer>
+    </div>
+
+    <div id="whitelistModal" class="custom-modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div><i class="fas fa-dagger" style="font-size:48px; color:#a12222;"></i> <i class="fas fa-skull" style="font-size:48px;"></i></div>
+            <div class="modal-message" id="modalMessageText">血之低语</div>
+            <button class="modal-close" id="modalCloseBtn"><i class="fas fa-hand-fist"></i> 领受诅咒</button>
+        </div>
+    </div>
+
+    <div id="toastMsg" class="toast-msg"><i class="fas fa-droplet"></i> 血咒已复制</div>
+
+    <div id="verifyOverlay" class="verify-overlay">
+        <div class="verify-card" id="verifyCard">
+            <div class="verify-title"><i class="fas fa-brain"></i> 血谜·三刑 <i class="fas fa-code-branch"></i></div>
+            <div class="progress-status" id="puzzleProgress">第 1 / 3 道 · 赎罪之数</div>
+            <div id="sudokuGridContainer" class="sudoku-grid"></div>
+            <div class="error-badge" id="errorCounterMsg"><i class="fas fa-skull"></i> 错误次数: 0 / 3</div>
+            <div class="verify-actions">
+                <button id="submitPuzzleBtn" class="blood-btn"><i class="fas fa-check-double"></i> 献祭此题</button>
+                <button id="resetVerifyBtn" class="blood-btn"><i class="fas fa-undo-alt"></i> 血祭重置</button>
+            </div>
+            <div style="margin-top: 14px; font-size: 0.7rem; color:#a14747;"><i class="fas fa-info-circle"></i> 每道题空位数不同(6/12/24)，填对通过，错3次则从头开始</div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // ======================== 工具函数 ========================
+            function shuffleArray(arr) {
+                for (let i = arr.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [arr[i], arr[j]] = [arr[j], arr[i]];
+                }
+                return arr;
+            }
+
+            // 生成随机完整终盘 (回溯法)
+            function generateRandomSudoku() {
+                let board = Array(9).fill().map(() => Array(9).fill(0));
+                // 随机第一行
+                let firstRow = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+                shuffleArray(firstRow);
+                for (let c = 0; c < 9; c++) board[0][c] = firstRow[c];
+
+                function findEmpty(board) {
+                    for (let i = 0; i < 9; i++)
+                        for (let j = 0; j < 9; j++)
+                            if (board[i][j] === 0) return [i, j];
+                    return null;
+                }
+
+                function isSafe(board, row, col, num) {
+                    for (let x = 0; x < 9; x++) if (board[row][x] === num) return false;
+                    for (let x = 0; x < 9; x++) if (board[x][col] === num) return false;
+                    let startRow = Math.floor(row / 3) * 3,
+                        startCol = Math.floor(col / 3) * 3;
+                    for (let i = 0; i < 3; i++)
+                        for (let j = 0; j < 3; j++)
+                            if (board[startRow + i][startCol + j] === num) return false;
+                    return true;
+                }
+
+                function solve(board) {
+                    let empty = findEmpty(board);
+                    if (!empty) return true;
+                    let [row, col] = empty;
+                    let nums = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+                    shuffleArray(nums);
+                    for (let num of nums) {
+                        if (isSafe(board, row, col, num)) {
+                            board[row][col] = num;
+                            if (solve(board)) return true;
+                            board[row][col] = 0;
+                        }
+                    }
+                    return false;
+                }
+                solve(board);
+                return board.map(row => [...row]);
+            }
+
+            // 根据指定的挖空数量生成 holes (随机位置)
+            function generateHolesByCount(fullBoard, holeCount) {
+                let positions = [];
+                for (let i = 0; i < 9; i++)
+                    for (let j = 0; j < 9; j++)
+                        positions.push([i, j]);
+                shuffleArray(positions);
+                let selected = positions.slice(0, holeCount);
+                // 确保挖空数量足够
+                while (selected.length < holeCount) {
+                    let rr = Math.floor(Math.random() * 9);
+                    let cc = Math.floor(Math.random() * 9);
+                    if (!selected.some(p => p[0] === rr && p[1] === cc)) {
+                        selected.push([rr, cc]);
+                    }
+                }
+                return selected.map(([r, c]) => ({ row: r, col: c, answer: fullBoard[r][c] }));
+            }
+
+            function buildPuzzleGrid(fullBoard, holes) {
+                let grid = fullBoard.map(row => [...row]);
+                for (let h of holes) grid[h.row][h.col] = 0;
+                return grid;
+            }
+
+            // 根据难度生成题目: 难度0 -> 6空, 难度1 -> 12空, 难度2 -> 24空
+            function generatePuzzleByDifficulty(difficulty) {
+                const fullSolution = generateRandomSudoku();
+                let holeCount = 0;
+                if (difficulty === 0) holeCount = 6;
+                else if (difficulty === 1) holeCount = 12;
+                else holeCount = 24;
+                const holes = generateHolesByCount(fullSolution, holeCount);
+                const grid = buildPuzzleGrid(fullSolution, holes);
+                return { grid, solution: fullSolution, holes };
+            }
+
+            // ======================== 验证流程状态 ========================
+            let currentStage = 0; // 0,1,2
+            let challenges = [null, null, null];
+            let currentGrid = null;
+            let currentHolesMap = null;
+            let userAnswers = {};
+            let errorCountForCurrent = 0;
+            const maxErrorsPerPuzzle = 3;
+            let verifyActive = true;
+
+            const verifyOverlay = document.getElementById('verifyOverlay');
+            const mainCard = document.getElementById('mainCard');
+            const sudokuContainer = document.getElementById('sudokuGridContainer');
+            const puzzleProgressSpan = document.getElementById('puzzleProgress');
+            const errorCounterSpan = document.getElementById('errorCounterMsg');
+
+            function updateErrorUI() {
+                if (errorCounterSpan) errorCounterSpan.innerHTML = `<i class="fas fa-skull"></i> 错误次数: ${errorCountForCurrent} / ${maxErrorsPerPuzzle}`;
+            }
+
+            function renderSudoku() {
+                if (!sudokuContainer) return;
+                sudokuContainer.innerHTML = '';
+                for (let i = 0; i < 9; i++) {
+                    for (let j = 0; j < 9; j++) {
+                        const cellValue = currentGrid[i][j];
+                        const isHole = currentHolesMap.some(h => h.row === i && h.col === j);
+                        const cell = document.createElement('div');
+                        cell.classList.add('sudoku-cell');
+                        if (!isHole) {
+                            cell.classList.add('fixed');
+                            cell.innerText = cellValue !== 0 ? cellValue : '';
+                        } else {
+                            cell.classList.add('editable');
+                            const input = document.createElement('input');
+                            input.type = 'text';
+                            input.maxLength = 1;
+                            const key = `${i},${j}`;
+                            input.value = userAnswers[key] || '';
+                            input.addEventListener('input', (e) => {
+                                let val = e.target.value.trim();
+                                if (val && /[1-9]/.test(val)) {
+                                    userAnswers[key] = parseInt(val);
+                                } else {
+                                    delete userAnswers[key];
+                                    input.value = '';
+                                }
+                                input.value = userAnswers[key] || '';
+                            });
+                            cell.appendChild(input);
+                        }
+                        sudokuContainer.appendChild(cell);
+                    }
+                }
+                // 加粗宫格线
+                const cells = sudokuContainer.children;
+                for (let idx = 0; idx < cells.length; idx++) {
+                    const row = Math.floor(idx / 9);
+                    const col = idx % 9;
+                    if (col % 3 === 2 && col !== 8) cells[idx].style.borderRight = '3px solid #a12222';
+                    if (row % 3 === 2 && row !== 8) cells[idx].style.borderBottom = '3px solid #a12222';
+                }
+            }
+
+            function resetCurrentPuzzle() {
+                const difficulty = currentStage;
+                const newPuzzle = generatePuzzleByDifficulty(difficulty);
+                challenges[currentStage] = newPuzzle;
+                currentGrid = newPuzzle.grid.map(row => [...row]);
+                currentHolesMap = [...newPuzzle.holes];
+                userAnswers = {};
+                renderSudoku();
+                updateErrorUI();
+                if (puzzleProgressSpan) puzzleProgressSpan.innerHTML = `<i class="fas fa-droplet"></i> 第 ${currentStage + 1} / 3 道 · 血窟谜题 <i class="fas fa-droplet"></i>`;
+            }
+
+            function verifyCurrentPuzzle() {
+                for (let hole of currentHolesMap) {
+                    const key = `${hole.row},${hole.col}`;
+                    const userVal = userAnswers[key];
+                    if (!userVal || userVal !== hole.answer) return false;
+                }
+                return true;
+            }
+
+            function showToastMsg(msg, isError = false) {
+                const toast = document.getElementById('toastMsg');
+                toast.innerHTML = `<i class="fas fa-tint"></i> ${msg}`;
+                toast.style.opacity = '1';
+                setTimeout(() => toast.style.opacity = '0', 1800);
+            }
+
+            function onSubmitPuzzle() {
+                if (!verifyActive) return;
+                if (verifyCurrentPuzzle()) {
+                    // 正确
+                    if (currentStage === 2) {
+                        // 三道全通
+                        verifyActive = false;
+                        verifyOverlay.style.opacity = '0';
+                        setTimeout(() => {
+                            verifyOverlay.style.display = 'none';
+                            mainCard.classList.add('active');
+                            initMainApp();
+                        }, 400);
+                        return;
+                    } else {
+                        currentStage++;
+                        errorCountForCurrent = 0;
+                        const newPuzzle = generatePuzzleByDifficulty(currentStage);
+                        challenges[currentStage] = newPuzzle;
+                        currentGrid = newPuzzle.grid.map(row => [...row]);
+                        currentHolesMap = [...newPuzzle.holes];
+                        userAnswers = {};
+                        renderSudoku();
+                        updateErrorUI();
+                        if (puzzleProgressSpan) puzzleProgressSpan.innerHTML = `<i class="fas fa-droplet"></i> 第 ${currentStage + 1} / 3 道 · 血窟谜题 <i class="fas fa-droplet"></i>`;
+                        showToastMsg("血谜通过 · 进入下一刑", false);
+                    }
+                } else {
+                    errorCountForCurrent++;
+                    updateErrorUI();
+                    showToastMsg(`血祭失败，剩余尝试 ${maxErrorsPerPuzzle - errorCountForCurrent}`, true);
+                    if (errorCountForCurrent >= maxErrorsPerPuzzle) {
+                        showToastMsg("🩸 三次血谬，献祭重置，从第一道重新开始 🩸", true);
+                        resetFullVerification();
+                    }
+                }
+            }
+
+            function resetFullVerification() {
+                currentStage = 0;
+                errorCountForCurrent = 0;
+                userAnswers = {};
+                for (let i = 0; i < 3; i++) {
+                    challenges[i] = generatePuzzleByDifficulty(i);
+                }
+                currentGrid = challenges[0].grid.map(row => [...row]);
+                currentHolesMap = [...challenges[0].holes];
+                renderSudoku();
+                updateErrorUI();
+                if (puzzleProgressSpan) puzzleProgressSpan.innerHTML = `<i class="fas fa-droplet"></i> 第 1 / 3 道 · 血窟谜题 <i class="fas fa-droplet"></i>`;
+            }
+
+            function initVerification() {
+                verifyActive = true;
+                currentStage = 0;
+                errorCountForCurrent = 0;
+                userAnswers = {};
+                for (let i = 0; i < 3; i++) {
+                    challenges[i] = generatePuzzleByDifficulty(i);
+                }
+                currentGrid = challenges[0].grid.map(row => [...row]);
+                currentHolesMap = [...challenges[0].holes];
+                renderSudoku();
+                updateErrorUI();
+                if (puzzleProgressSpan) puzzleProgressSpan.innerHTML = `<i class="fas fa-droplet"></i> 第 1 / 3 道 · 血窟谜题 <i class="fas fa-droplet"></i>`;
+                verifyOverlay.style.display = 'flex';
+                verifyOverlay.style.opacity = '1';
+                mainCard.classList.remove('active');
+            }
+
+            // 绑定按钮事件
+            document.getElementById('submitPuzzleBtn').addEventListener('click', onSubmitPuzzle);
+            document.getElementById('resetVerifyBtn').addEventListener('click', resetFullVerification);
+
+            // ======================== 密码主应用逻辑 ========================
+            function getTodayDateStr() {
+                const d = new Date();
+                return `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
+            }
+
+            function generateDailyPassword(username, dateStr) {
+                if (!username) return null;
+                return CryptoJS.MD5(`${username.trim()}-${dateStr}-${username.trim()}`).toString();
+            }
+
+            const usernameInput = document.getElementById('usernameInput');
+            const todayDateSpan = document.getElementById('todayDateDisplay');
+            const passwordDisplayDiv = document.getElementById('passwordDisplay');
+            const copyBtn = document.getElementById('copyBtn');
+            const refreshDateBtn = document.getElementById('refreshDateBtn');
+            const manualGenBtn = document.getElementById('manualGenBtn');
+            const clearMemoryBtn = document.getElementById('clearMemoryBtn');
+            const whitelistModal = document.getElementById('whitelistModal');
+            const modalMessageSpan = document.getElementById('modalMessageText');
+            const modalCloseBtn = document.getElementById('modalCloseBtn');
+
+            const whitelistMessages = {
+                "小草莓": "🍓 小草莓，血液甘甜祭品",
+                "胖喵酱": "🐱 胖喵酱骨肉诅咒",
+                "不二胖喵": "深渊索命",
+                "布丁": "血宴主菜",
+                "奶茶": "腥红毒药",
+                "牟晨稳": "血肉牛蹄",
+                "邱德良": "面皮剥下",
+                "刘哲": "脊骨权杖",
+                "王浩": "恶鬼吞噬",
+                "杨玲飞": "蜘蛛巢饵"
+            };
+            let lastWhitelistUser = "";
+
+            function showWhitelistMessageIfNeeded(username) {
+                if (!username) return false;
+                const lower = username.toLowerCase();
+                for (let [k, msg] of Object.entries(whitelistMessages)) {
+                    if (k.toLowerCase() === lower) {
+                        modalMessageSpan.innerText = msg;
+                        whitelistModal.classList.add('show');
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            modalCloseBtn.onclick = () => whitelistModal.classList.remove('show');
+            whitelistModal.addEventListener('click', (e) => {
+                if (e.target === whitelistModal || e.target.classList.contains('modal-overlay')) whitelistModal.classList.remove('show');
+            });
+
+            function refreshAll(updateStorage, triggerModal) {
+                const today = getTodayDateStr();
+                todayDateSpan.innerText = today;
+                const uname = usernameInput.value.trim();
+                if (!uname) {
+                    passwordDisplayDiv.innerHTML = '💀 无名无法献祭';
+                    passwordDisplayDiv.setAttribute('data-pwd', '');
+                    return;
+                }
+                const pwd = generateDailyPassword(uname, today);
+                if (pwd) {
+                    passwordDisplayDiv.innerHTML = pwd;
+                    passwordDisplayDiv.setAttribute('data-pwd', pwd);
+                    if (updateStorage) localStorage.setItem('daily_pwd_username', uname);
+                    if (triggerModal && uname !== lastWhitelistUser && showWhitelistMessageIfNeeded(uname)) lastWhitelistUser = uname;
+                } else {
+                    passwordDisplayDiv.innerHTML = '❌ 召唤失败';
+                    passwordDisplayDiv.setAttribute('data-pwd', '');
+                }
+            }
+
+            function forceRegenerate(triggerModal) {
+                refreshAll(true, triggerModal);
+            }
+
+            function copyCurrentPassword() {
+                const pwd = passwordDisplayDiv.getAttribute('data-pwd');
+                if (pwd) {
+                    navigator.clipboard.writeText(pwd);
+                    showToastMsg('血咒铭刻', false);
+                } else showToastMsg('无密文', true);
+            }
+
+            let debounceTimer;
+
+            function onUsernameInput() {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => refreshAll(true, true), 300);
+            }
+
+            function clearUsernameMemory() {
+                localStorage.removeItem('daily_pwd_username');
+                usernameInput.value = '';
+                refreshAll(false, false);
+                passwordDisplayDiv.innerHTML = '🩸 记忆抹除·献新魂';
+                passwordDisplayDiv.setAttribute('data-pwd', '');
+                showToastMsg('血祭名录清除', false);
+            }
+
+            function initMainApp() {
+                const saved = localStorage.getItem('daily_pwd_username');
+                if (saved) {
+                    usernameInput.value = saved;
+                    refreshAll(true, false);
+                } else {
+                    refreshAll(false, false);
+                }
+                usernameInput.addEventListener('input', onUsernameInput);
+                copyBtn.addEventListener('click', copyCurrentPassword);
+                refreshDateBtn.addEventListener('click', () => forceRegenerate(true));
+                manualGenBtn.addEventListener('click', () => forceRegenerate(true));
+                clearMemoryBtn.addEventListener('click', clearUsernameMemory);
+            }
+
+            // 启动验证流程
+            initVerification();
+        })();
+    </script>
+</body>
+
+</html>

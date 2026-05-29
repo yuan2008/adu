@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="theme-color" content="#FFB7C5">
+    <title>🐱 超肉麻喵 · 24点智慧之门 · 每日密码</title>
+    <!-- 引入 CryptoJS MD5 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: linear-gradient(145deg, #ffe6f0 0%, #ffd9e6 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', 'Quicksand', system-ui, -apple-system, 'Poppins', 'Helvetica Neue', 'Noto Sans', sans-serif;
+            padding: 20px;
+            position: relative;
+        }
+
+        body::before {
+            content: "🌸🐾🌸";
+            position: absolute;
+            top: 10px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 32px;
+            opacity: 0.2;
+            pointer-events: none;
+            white-space: nowrap;
+            letter-spacing: 12px;
+        }
+
+        body::after {
+            content: "✨💖✨";
+            position: absolute;
+            bottom: 15px;
+            right: 10px;
+            font-size: 28px;
+            opacity: 0.25;
+            pointer-events: none;
+        }
+
+        /* 主卡片 */
+        .card {
+            background-color: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(2px);
+            border-radius: 56px;
+            box-shadow: 0 25px 45px rgba(255, 105, 180, 0.25), 0 8px 18px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255,255,255,0.8);
+            width: 100%;
+            max-width: 520px;
+            padding: 2rem 1.8rem 2.2rem;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 220, 230, 0.7);
+            position: relative;
+            z-index: 2;
+            opacity: 0;
+            transform: scale(0.98);
+            transition: opacity 0.5s ease, transform 0.4s ease;
+            pointer-events: none;
+        }
+        .card.active {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .cat-icon {
+            font-size: 58px;
+            filter: drop-shadow(2px 4px 12px rgba(255, 80, 120, 0.3));
+            animation: bounceSoft 2s infinite ease;
+            display: inline-block;
+        }
+
+        @keyframes bounceSoft {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        h1 {
+            font-size: 1.9rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #FF90B5, #FFB7C5, #FFA0C0);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: -0.3px;
+            margin-top: 8px;
+            text-shadow: 0 2px 5px rgba(255, 200, 210, 0.5);
+        }
+
+        .sub {
+            font-size: 0.8rem;
+            color: #e48aaa;
+            background: #fff0f5;
+            display: inline-block;
+            padding: 4px 14px;
+            border-radius: 40px;
+            margin-top: 8px;
+            font-weight: 500;
+        }
+
+        .input-group {
+            margin-bottom: 28px;
+            position: relative;
+        }
+
+        .input-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 600;
+            color: #c96f8f;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+        .clear-memory {
+            text-align: right;
+            margin-top: 8px;
+        }
+        .clear-btn {
+            background: #ffe0eb;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 40px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #e47a9e;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 6px rgba(255, 100, 130, 0.15);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .clear-btn:active {
+            transform: scale(0.96);
+            background: #ffd0de;
+        }
+        .username-input {
+            width: 100%;
+            padding: 16px 20px;
+            font-size: 1.05rem;
+            border: 2px solid #ffe2ed;
+            border-radius: 60px;
+            background: #fffef7;
+            transition: all 0.25s;
+            outline: none;
+            font-weight: 500;
+            color: #7a4e60;
+            font-family: inherit;
+        }
+        .username-input:focus {
+            border-color: #FF9EBB;
+            box-shadow: 0 0 0 4px rgba(255, 158, 187, 0.2);
+            background: white;
+        }
+        .date-badge {
+            background: #ffeef4;
+            border-radius: 100px;
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+            gap: 10px;
+            border: 1px solid #ffd6e4;
+        }
+        .date-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1rem;
+            background: white;
+            padding: 5px 14px;
+            border-radius: 50px;
+            color: #e47a9e;
+            font-weight: 600;
+        }
+        .refresh-date-btn {
+            background: #ffb7c9;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 60px;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 4px 8px rgba(255, 100, 130, 0.2);
+        }
+        .password-area {
+            background: #fff9fb;
+            border-radius: 48px;
+            padding: 20px 18px;
+            margin-bottom: 28px;
+            border: 2px dashed #ffc0d0;
+        }
+        .password-label {
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+            font-weight: 700;
+            color: #f0a1bd;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .password-value {
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 1rem;
+            word-break: break-all;
+            background: #ffffffcc;
+            padding: 14px 12px;
+            border-radius: 34px;
+            color: #bf6f8a;
+            font-weight: 500;
+            border: 1px solid #ffecf0;
+        }
+        .button-group {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            flex: 1;
+            padding: 14px 8px;
+            border-radius: 66px;
+            font-weight: 700;
+            font-size: 1rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: white;
+            color: #e47a9e;
+            box-shadow: 0 4px 10px rgba(255, 90, 120, 0.15);
+            border: 1px solid #ffd3e0;
+        }
+        .btn-primary {
+            background: linear-gradient(115deg, #FFB7C5, #FF9EBB);
+            color: white;
+            border: none;
+            box-shadow: 0 8px 18px #ffb0c470;
+        }
+        .btn-clicked {
+            transform: scale(0.94) !important;
+            transition: transform 0.08s cubic-bezier(0.2, 1.6, 0.4, 1);
+        }
+        .floating-heart {
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            font-size: 28px;
+            animation: floatUp 1s ease-out forwards;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(0.6); opacity: 1; }
+            100% { transform: translateY(-120px) scale(1.2); opacity: 0; }
+        }
+        .custom-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            visibility: hidden;
+            opacity: 0;
+            transition: all 0.2s ease;
+        }
+        .custom-modal.show {
+            visibility: visible;
+            opacity: 1;
+        }
+        .modal-overlay {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 180, 190, 0.4);
+            backdrop-filter: blur(4px);
+        }
+        .modal-content {
+            position: relative;
+            background: #fffafc;
+            max-width: 280px;
+            width: 80%;
+            padding: 28px 20px 24px;
+            border-radius: 68px;
+            text-align: center;
+            box-shadow: 0 20px 35px rgba(255, 80, 120, 0.3);
+            border: 2px solid #ffbfcf;
+        }
+        .modal-emoji { font-size: 48px; margin-bottom: 12px; }
+        .modal-message { color: #c2698a; font-weight: 600; font-size: 1.2rem; margin: 12px 0 16px; }
+        .modal-close { background: #ffb7c9; border: none; padding: 8px 24px; border-radius: 50px; color: white; font-weight: bold; cursor: pointer; }
+        footer { text-align: center; font-size: 0.6rem; color: #f4adc4; margin-top: 20px; }
+
+        /* ---------- 24点验证层 (超可爱按钮交互) ---------- */
+        .verify-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 210, 225, 0.94);
+            backdrop-filter: blur(14px);
+            z-index: 20000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.4s cubic-bezier(0.34, 1.2, 0.64, 1);
+        }
+        .verify-card {
+            background: #fff9fc;
+            border-radius: 72px;
+            max-width: 550px;
+            width: 92%;
+            padding: 1.5rem 1.2rem;
+            text-align: center;
+            box-shadow: 0 30px 40px rgba(255, 80, 120, 0.3);
+            border: 3px solid #ffc0d0;
+            animation: bounceIn 0.45s ease;
+        }
+        @keyframes bounceIn {
+            0% { transform: scale(0.7); opacity: 0; }
+            80% { transform: scale(1.02); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .game-emoji { font-size: 58px; margin-bottom: 8px; filter: drop-shadow(2px 4px 12px #ffb0c0); }
+        .game-title {
+            font-size: 1.7rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #FF90B5, #FFB0C5);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+        .level-badge {
+            background: #ffeef4;
+            display: inline-block;
+            padding: 6px 20px;
+            border-radius: 60px;
+            margin: 12px 0 8px;
+            font-weight: 700;
+            color: #dd7c9e;
+            font-size: 1rem;
+        }
+        /* 四个数字卡片 grid 修复手机一行四个 */
+        .cards-area {
+            background: #fff5f8;
+            border-radius: 60px;
+            padding: 16px 12px;
+            margin: 16px 0;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            justify-items: center;
+        }
+        .number-card {
+            background: linear-gradient(145deg, #FFF0F5, #FFE4ED);
+            width: 100%;
+            max-width: 80px;
+            aspect-ratio: 1 / 1;
+            border-radius: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.4rem;
+            font-weight: 800;
+            color: #c95f83;
+            box-shadow: 0 8px 14px rgba(201, 95, 131, 0.2);
+            border: 2px solid #ffbfcf;
+            font-family: monospace;
+        }
+        /* 表达式显示区 */
+        .expr-display-area {
+            background: #fff0f5;
+            border-radius: 60px;
+            padding: 12px 16px;
+            margin: 12px 0;
+            border: 2px solid #ffd3e0;
+        }
+        .expr-label {
+            font-size: 0.7rem;
+            color: #e893af;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+            text-align: left;
+        }
+        .expression-readonly {
+            background: white;
+            border-radius: 50px;
+            padding: 12px 16px;
+            font-family: 'Fira Code', monospace;
+            font-size: 1rem;
+            text-align: left;
+            word-break: break-all;
+            min-height: 60px;
+            color: #b25d7e;
+            font-weight: 500;
+            border: 1px solid #ffe0ea;
+        }
+        /* 按钮键盘面板 */
+        .keyboard-panel {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin: 16px 0 12px;
+        }
+        .game-btn {
+            background: #fff0f5;
+            border: none;
+            padding: 14px 0;
+            border-radius: 60px;
+            font-weight: 700;
+            font-size: 1.3rem;
+            color: #e47a9e;
+            cursor: pointer;
+            transition: 0.08s linear;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            font-family: monospace;
+        }
+        .game-btn:active { transform: scale(0.94); background: #ffe4ed; }
+        .btn-operator { background: #ffe0eb; color: #dd7c9e; font-size: 1.5rem; }
+        .btn-clear { background: #ffd9e6; color: #e87aa3; }
+        .btn-submit { background: #ffb7c9; color: white; box-shadow: 0 4px 10px rgba(255,100,130,0.3); }
+        .digit-btn { font-size: 1.6rem; font-weight: 800; background: #fff5f8; }
+        .btn-bracket { background: #ffeef4; font-size: 1.3rem; }
+        .action-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 8px;
+        }
+        .action-row .game-btn { flex: 1; font-size: 1rem; padding: 12px; }
+        .game-status {
+            font-size: 0.8rem;
+            color: #e893af;
+            background: #fff0f5;
+            padding: 8px;
+            border-radius: 60px;
+            margin-top: 12px;
+        }
+        @media (max-width: 480px) {
+            .number-card { font-size: 1.8rem; max-width: 65px; }
+            .game-title { font-size: 1.4rem; }
+            .keyboard-panel { gap: 6px; }
+            .game-btn { padding: 10px 0; font-size: 1.2rem; }
+            .digit-btn { font-size: 1.4rem; }
+        }
+        .toast-msg {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ff90b5dd;
+            backdrop-filter: blur(12px);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 60px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+            z-index: 10001;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body>
+    <!-- 主应用卡片 -->
+    <div class="card" id="mainCard">
+        <div class="header">
+            <div class="cat-icon">🐱💗🌸</div>
+            <h1>不二胖喵 · 每日秘语</h1>
+            <div class="sub">✨ 只属于今天的魔法密码 ✨</div>
+        </div>
+        <div class="input-group">
+            <div class="input-label"><span>🐾</span> 你的专属昵称</div>
+            <input type="text" id="usernameInput" class="username-input" placeholder="例如: 小草莓 / 胖喵酱" autocomplete="off">
+            <div class="clear-memory">
+                <button id="clearMemoryBtn" class="clear-btn" type="button">🧹 清除记忆用户名</button>
+            </div>
+        </div>
+        <div class="date-badge">
+            <div class="date-info"><span>📅🌸</span> 今日密钥日期 <strong id="todayDateDisplay">----</strong></div>
+            <button id="refreshDateBtn" class="refresh-date-btn">🔄 刷新今日密码</button>
+        </div>
+        <div class="password-area">
+            <div class="password-label"><span>🔐🍰</span> 每日密码 (MD5)</div>
+            <div id="passwordDisplay" class="password-value">💖 输入用户名后自动生成 💖</div>
+        </div>
+        <div class="button-group">
+            <button id="copyBtn" class="btn btn-primary">📋 一键复制密码</button>
+            <button id="manualGenBtn" class="btn btn-outline">✨ 生成 / 同步</button>
+        </div>
+        <footer>🐈 每天密码都会不同 · 每点一下都会飞出小爱心哟 💕</footer>
+    </div>
+
+    <!-- 白名单弹窗 -->
+    <div id="whitelistModal" class="custom-modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-emoji">🎀✨</div>
+            <div class="modal-message" id="modalMessageText">专属小惊喜</div>
+            <button class="modal-close" id="modalCloseBtn">💖 知道啦 💖</button>
+        </div>
+    </div>
+    <div id="toastMsg" class="toast-msg">🌸 操作成功</div>
+
+    <!-- 24点按钮交互验证层 -->
+    <div id="verifyOverlay" class="verify-overlay">
+        <div class="verify-card">
+            <div class="game-emoji">🧸🎲💖</div>
+            <div class="game-title">🐱 24点·按钮算式 🐱</div>
+            <div class="level-badge" id="levelDisplay">第 1 / 20 关</div>
+            <!-- 四个数字卡片 一行4个grid -->
+            <div class="cards-area" id="numberCardsArea">
+                <div class="number-card">8</div>
+                <div class="number-card">3</div>
+                <div class="number-card">3</div>
+                <div class="number-card">8</div>
+            </div>
+            <!-- 表达式显示区域 -->
+            <div class="expr-display-area">
+                <div class="expr-label">📝 你的算式</div>
+                <div id="currentExpression" class="expression-readonly">✨ 点击下方数字和运算符 ✨</div>
+            </div>
+            <!-- 按钮键盘 -->
+            <div class="keyboard-panel" id="keyboardPanel">
+                <!-- 动态数字按钮会由js生成，同时保留运算符 -->
+            </div>
+            <div class="action-row">
+                <button id="clearExprBtn" class="game-btn btn-clear">🗑️ 清空</button>
+                <button id="backspaceBtn" class="game-btn btn-clear">⌫ 退格</button>
+                <button id="verifyGameBtn" class="game-btn btn-submit">✨ 喵喵验证 ✨</button>
+            </div>
+            <div id="gameStatusMsg" class="game-status">🌸 用四个数字，点击按钮组合成24点算式！数字只能用一次，顺序随意～ 🌸</div>
+            <div class="verify-tip" style="font-size:0.7rem; margin-top:10px;">💡 点击数字/运算符/括号构建算式，最后按验证～ 加减乘除和括号都支持！</div>
+        </div>
+    </div>
+
+    <script>
+        (function(){
+            // ---------- 24点游戏相关 ----------
+            let currentLevel = 0;           // 0~19
+            let currentNumbers = [];          // 四个数字
+            let expressionStr = "";           // 当前构建的表达式字符串
+            
+            // DOM 元素
+            const verifyOverlay = document.getElementById('verifyOverlay');
+            const levelDisplay = document.getElementById('levelDisplay');
+            const numberCardsArea = document.getElementById('numberCardsArea');
+            const keyboardPanel = document.getElementById('keyboardPanel');
+            const currentExpressionDiv = document.getElementById('currentExpression');
+            const clearExprBtn = document.getElementById('clearExprBtn');
+            const backspaceBtn = document.getElementById('backspaceBtn');
+            const verifyGameBtn = document.getElementById('verifyGameBtn');
+            const gameStatusMsg = document.getElementById('gameStatusMsg');
+            const mainCard = document.getElementById('mainCard');
+            
+            // 主应用相关元素
+            const usernameInput = document.getElementById('usernameInput');
+            const todayDateSpan = document.getElementById('todayDateDisplay');
+            const passwordDisplayDiv = document.getElementById('passwordDisplay');
+            const copyBtn = document.getElementById('copyBtn');
+            const refreshDateBtn = document.getElementById('refreshDateBtn');
+            const manualGenBtn = document.getElementById('manualGenBtn');
+            const clearMemoryBtn = document.getElementById('clearMemoryBtn');
+            const toastEl = document.getElementById('toastMsg');
+            const whitelistModal = document.getElementById('whitelistModal');
+            const modalMessageSpan = document.getElementById('modalMessageText');
+            const modalCloseBtn = document.getElementById('modalCloseBtn');
+            
+            // 爱心特效
+            function createFloatingHeart(x, y) {
+                const heart = document.createElement('div');
+                heart.className = 'floating-heart';
+                const emojis = ['💖', '🌸', '🐱', '✨', '🍰', '💕', '🐾', '🎲'];
+                heart.innerHTML = emojis[Math.floor(Math.random() * emojis.length)];
+                heart.style.left = (x - 20) + 'px';
+                heart.style.top = (y - 20) + 'px';
+                document.body.appendChild(heart);
+                setTimeout(() => heart.remove(), 1000);
+            }
+            function addButtonEffect(btnElement) {
+                if (!btnElement) return;
+                btnElement.addEventListener('click', (e) => {
+                    btnElement.classList.add('btn-clicked');
+                    setTimeout(() => btnElement.classList.remove('btn-clicked'), 120);
+                    const rect = btnElement.getBoundingClientRect();
+                    const centerX = rect.left + rect.width / 2;
+                    const centerY = rect.top + rect.height / 2;
+                    createFloatingHeart(centerX, centerY);
+                });
+            }
+            
+            // ========== 24点求解器 & 题目生成 ==========
+            function isSolvable24(nums) {
+                const eps = 1e-6;
+                const target = 24;
+                function dfs(arr) {
+                    if (arr.length === 1) return Math.abs(arr[0] - target) < eps;
+                    for (let i = 0; i < arr.length; i++) {
+                        for (let j = i + 1; j < arr.length; j++) {
+                            const a = arr[i], b = arr[j];
+                            const rest = arr.filter((_, idx) => idx !== i && idx !== j);
+                            const candidates = [a + b, a - b, b - a, a * b];
+                            if (Math.abs(b) > eps) candidates.push(a / b);
+                            if (Math.abs(a) > eps) candidates.push(b / a);
+                            for (const val of candidates) {
+                                if (dfs([...rest, val])) return true;
+                            }
+                        }
+                    }
+                    return false;
+                }
+                return dfs([...nums]);
+            }
+            
+            function generateSolvableByLevel(level) {
+                let maxVal = 8;
+                if (level >= 5 && level <= 9) maxVal = 10;
+                else if (level >= 10 && level <= 14) maxVal = 12;
+                else if (level >= 15) maxVal = 13;
+                for (let attempt = 0; attempt < 60; attempt++) {
+                    const nums = [];
+                    for (let i = 0; i < 4; i++) nums.push(Math.floor(Math.random() * maxVal) + 1);
+                    if (isSolvable24(nums)) return nums;
+                }
+                const fallbacks = [[3,3,8,8], [4,4,10,10], [1,3,4,6], [3,3,7,7]];
+                return fallbacks[level % fallbacks.length];
+            }
+            
+            // 刷新UI：数字卡片 + 重建数字按钮 + 清空表达式
+            function refreshGameUI() {
+                // 更新关卡文本
+                levelDisplay.innerText = `第 ${currentLevel+1} / 20 关`;
+                // 更新四个数字卡片
+                numberCardsArea.innerHTML = '';
+                currentNumbers.forEach(num => {
+                    const card = document.createElement('div');
+                    card.className = 'number-card';
+                    card.innerText = num;
+                    numberCardsArea.appendChild(card);
+                });
+                // 重建键盘面板（数字动态 + 运算符固定）
+                rebuildKeyboard();
+                // 清空当前表达式
+                clearExpression();
+                gameStatusMsg.innerHTML = `🐣 第${currentLevel+1}关 · 用 ${currentNumbers.join(', ')} 组合24点～ 点击下方按钮写算式 🐣`;
+            }
+            
+            // 构建按钮面板 (四个数字按钮 + 运算符 + 括号)
+            function rebuildKeyboard() {
+                keyboardPanel.innerHTML = '';
+                // 先添加四个数字按钮
+                currentNumbers.forEach(num => {
+                    const btn = document.createElement('button');
+                    btn.className = 'game-btn digit-btn';
+                    btn.innerText = num;
+                    btn.addEventListener('click', (e) => {
+                        appendToExpression(num.toString());
+                        createFloatingHeart(e.clientX, e.clientY);
+                    });
+                    keyboardPanel.appendChild(btn);
+                });
+                // 运算符 + - * /
+                const operators = ['+', '-', '*', '/'];
+                operators.forEach(op => {
+                    const btn = document.createElement('button');
+                    btn.className = 'game-btn btn-operator';
+                    btn.innerText = op;
+                    btn.addEventListener('click', (e) => {
+                        appendToExpression(op);
+                        createFloatingHeart(e.clientX, e.clientY);
+                    });
+                    keyboardPanel.appendChild(btn);
+                });
+                // 括号 ( )
+                const leftParen = document.createElement('button');
+                leftParen.className = 'game-btn btn-bracket';
+                leftParen.innerText = '(';
+                leftParen.addEventListener('click', (e) => { appendToExpression('('); createFloatingHeart(e.clientX, e.clientY); });
+                const rightParen = document.createElement('button');
+                rightParen.className = 'game-btn btn-bracket';
+                rightParen.innerText = ')';
+                rightParen.addEventListener('click', (e) => { appendToExpression(')'); createFloatingHeart(e.clientX, e.clientY); });
+                keyboardPanel.appendChild(leftParen);
+                keyboardPanel.appendChild(rightParen);
+            }
+            
+            function appendToExpression(str) {
+                expressionStr += str;
+                currentExpressionDiv.innerText = expressionStr || '✨ 点击下方数字和运算符 ✨';
+            }
+            
+            function clearExpression() {
+                expressionStr = '';
+                currentExpressionDiv.innerText = '✨ 点击下方数字和运算符 ✨';
+            }
+            
+            function backspaceExpression() {
+                expressionStr = expressionStr.slice(0, -1);
+                currentExpressionDiv.innerText = expressionStr || '✨ 点击下方数字和运算符 ✨';
+            }
+            
+            // 验证算式是否正确（使用原有逻辑，检查数字频次是否匹配且计算结果为24）
+            function validateExpressionWithNumbers(expr, numbers) {
+                if (!expr.trim()) return false;
+                try {
+                    const tokens = expr.match(/\d+(?:\.\d+)?/g);
+                    if (!tokens) return false;
+                    const usedNumbers = tokens.map(Number);
+                    if (usedNumbers.length !== numbers.length) return false;
+                    const sortedUsed = [...usedNumbers].sort((a,b)=>a-b);
+                    const sortedTarget = [...numbers].sort((a,b)=>a-b);
+                    if (!sortedUsed.every((val, idx) => Math.abs(val - sortedTarget[idx]) < 1e-6)) return false;
+                    const result = eval(expr);
+                    if (Math.abs(result - 24) < 1e-6) return true;
+                } catch(e) { return false; }
+                return false;
+            }
+            
+            function goToNextLevel() {
+                if (currentLevel + 1 >= 20) {
+                    gameStatusMsg.innerHTML = "🎉✨ 太强啦！20道24点全通关！欢迎来到魔法世界 ✨🎉";
+                    createFloatingHeart(window.innerWidth/2, window.innerHeight/2);
+                    setTimeout(() => {
+                        verifyOverlay.style.opacity = "0";
+                        setTimeout(() => {
+                            verifyOverlay.style.display = "none";
+                            mainCard.classList.add('active');
+                            if (!window._mainAppReady) {
+                                initMainApp();
+                                window._mainAppReady = true;
+                            }
+                        }, 400);
+                    }, 800);
+                    return;
+                }
+                currentLevel++;
+                currentNumbers = generateSolvableByLevel(currentLevel);
+                refreshGameUI();
+                gameStatusMsg.innerHTML = `🎉 恭喜过关！进入第${currentLevel+1}关！新题目来咯～ 🎉`;
+                createFloatingHeart(window.innerWidth/2, window.innerHeight/2);
+            }
+            
+            function handleVerify() {
+                if (!expressionStr.trim()) {
+                    gameStatusMsg.innerHTML = "💢 先点击数字和运算符写个算式呀～ 比如 8*3*(3-8/8) 但数字要用完 💢";
+                    return;
+                }
+                const isValid = validateExpressionWithNumbers(expressionStr, currentNumbers);
+                if (isValid) {
+                    for(let i=0;i<3;i++) setTimeout(()=> createFloatingHeart(window.innerWidth/2, window.innerHeight/2), i*70);
+                    gameStatusMsg.innerHTML = "✅ 正确！！ 宝贝太聪明了，进入下一关 ✅";
+                    goToNextLevel();
+                } else {
+                    gameStatusMsg.innerHTML = "❌ 算式不对哦～ 要用齐四个数字并且结果等于24！再检查一下～ ❌";
+                    createFloatingHeart(window.innerWidth/2, window.innerHeight/2);
+                }
+            }
+            
+            function resetChallenge() {
+                currentLevel = 0;
+                currentNumbers = generateSolvableByLevel(0);
+                refreshGameUI();
+                gameStatusMsg.innerHTML = "🌸 重新开始挑战！新生成20关递增难度，加油喵！ 🌸";
+                createFloatingHeart(window.innerWidth/2, window.innerHeight/2);
+            }
+            
+            // 初始化验证游戏
+            function initGameVerification() {
+                currentLevel = 0;
+                currentNumbers = generateSolvableByLevel(0);
+                refreshGameUI();
+                verifyOverlay.style.display = "flex";
+                verifyOverlay.style.opacity = "1";
+                mainCard.classList.remove('active');
+            }
+            
+            // ========== 主应用逻辑（密码生成器）保持完整 ==========
+            const whitelistMessages = {
+                "小草莓": "🍓 小草莓宝贝！ 今天也是甜甜的一天，快让喵喵亲一口～ 💋💖",
+                "胖喵酱": "🐱 胖喵酱小可爱驾到！ 捏捏你的小脸蛋，今天必须开心！ 🌸",
+                "不二胖喵": "✨ 主人回家啦！ 不二胖喵的心扑通扑通，好想你呀～ 🎀 要抱抱！",
+                "布丁": "🍮 呜～布丁小软糖！ 给你全世界最甜的拥抱 🥰 啵啵！",
+                "奶茶": "🧋 奶茶宝贝，你的甜度已经超过全糖啦！ 今天也要元气满满哟 💗",
+                "牟晨稳": "🐮 牟牟宝宝乖乖～ 你要做全世界最听话的小牛牛 啾咪❤️",
+                "邱德良": "✨ 帅气毛毛邱德良！ 今天的晚霞和你一样浪漫，黄色的小星星都为你闪呀闪 🌟",
+                "刘哲": "🌸 小哲哲～ 你一来空气都变甜了！ 给你一个能把冰山融化的抱抱 🧸",
+                "王浩": "🐾 诶呀是王浩小可爱！ 你和小白都是我的心头宝，要幸福喔 🐕💖",
+                "杨玲飞": "是小飞飞哦~  可可爱爱的小飞飞(づ◡ど)"
+            };
+            function showWhitelistMessageIfNeeded(username) {
+                if (!username) return false;
+                const lowerKey = username.toLowerCase();
+                let matchedMessage = null;
+                for (let [key, msg] of Object.entries(whitelistMessages)) {
+                    if (key.toLowerCase() === lowerKey) { matchedMessage = msg; break; }
+                }
+                if (matchedMessage) {
+                    modalMessageSpan.innerText = matchedMessage;
+                    whitelistModal.classList.add('show');
+                    createFloatingHeart(window.innerWidth/2, window.innerHeight/2);
+                    return true;
+                }
+                return false;
+            }
+            function closeModal() { whitelistModal.classList.remove('show'); }
+            modalCloseBtn.addEventListener('click', closeModal);
+            whitelistModal.addEventListener('click', (e) => { if (e.target === whitelistModal || e.target.classList.contains('modal-overlay')) closeModal(); });
+            function getTodayDateStr() { const d = new Date(); return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`; }
+            function generateDailyPassword(username, dateStr) { if (!username||!username.trim()) return null; const raw=`${username.trim()}-${dateStr}-${username.trim()}`; return CryptoJS.MD5(raw).toString(); }
+            function showToast(msg, isErr=false) { toastEl.textContent = msg; toastEl.style.background = isErr ? "#ff99bbdd" : "#ff90b5dd"; toastEl.style.opacity='1'; setTimeout(()=> toastEl.style.opacity='0', 1800); }
+            let lastTriggeredWhitelistUser = "";
+            function refreshAll(updateStorage=true, triggerModal=true) {
+                const today=getTodayDateStr(); todayDateSpan.innerText=today;
+                const uname=usernameInput.value.trim();
+                if(!uname){ passwordDisplayDiv.innerHTML='🐣 喵呜~ 先输入可爱的用户名吧 🐣'; passwordDisplayDiv.setAttribute('data-valid-pwd','false'); passwordDisplayDiv.setAttribute('data-pwd-value',''); return; }
+                const pwd=generateDailyPassword(uname,today);
+                if(pwd){
+                    passwordDisplayDiv.innerHTML=pwd; passwordDisplayDiv.classList.remove('error-pwd'); 
+                    passwordDisplayDiv.setAttribute('data-valid-pwd','true'); passwordDisplayDiv.setAttribute('data-pwd-value',pwd);
+                    if(updateStorage) localStorage.setItem('daily_pwd_username',uname);
+                    if(triggerModal && uname!==lastTriggeredWhitelistUser){ if(showWhitelistMessageIfNeeded(uname)) lastTriggeredWhitelistUser=uname; }
+                } else { passwordDisplayDiv.innerHTML='❌ 生成失败'; passwordDisplayDiv.setAttribute('data-valid-pwd','false'); passwordDisplayDiv.setAttribute('data-pwd-value',''); }
+            }
+            function forceRegenerate(triggerModal=true){
+                const today=getTodayDateStr(); todayDateSpan.innerText=today;
+                const uname=usernameInput.value.trim();
+                if(!uname){ passwordDisplayDiv.innerHTML='🐣 喵~ 先输入可爱的用户名吧 🐣'; passwordDisplayDiv.setAttribute('data-valid-pwd','false'); return; }
+                const pwd=generateDailyPassword(uname,today);
+                if(pwd){
+                    passwordDisplayDiv.innerHTML=pwd; passwordDisplayDiv.setAttribute('data-valid-pwd','true'); passwordDisplayDiv.setAttribute('data-pwd-value',pwd);
+                    localStorage.setItem('daily_pwd_username',uname);
+                    if(triggerModal && uname!==lastTriggeredWhitelistUser){ if(showWhitelistMessageIfNeeded(uname)) lastTriggeredWhitelistUser=uname; }
+                } else { passwordDisplayDiv.innerHTML='❌ 生成失败'; passwordDisplayDiv.setAttribute('data-valid-pwd','false'); }
+            }
+            function copyCurrentPassword(){
+                const valid=passwordDisplayDiv.getAttribute('data-valid-pwd')==='true';
+                const pwd=passwordDisplayDiv.getAttribute('data-pwd-value');
+                if(!valid||!pwd){ showToast('💔 还没有有效密码，先输入昵称吖～',true); return; }
+                navigator.clipboard.writeText(pwd).then(()=> showToast('🐱 密码复制好啦！ 喵呜～～')).catch(()=> showToast('❌ 复制失败',true));
+            }
+            let debounceTimer;
+            function onUsernameInput() { clearTimeout(debounceTimer); debounceTimer=setTimeout(()=>{ const val=usernameInput.value.trim(); if(!val){ const today=getTodayDateStr(); todayDateSpan.innerText=today; passwordDisplayDiv.innerHTML='🐣 喵~ 先输入可爱的用户名吧 🐣'; passwordDisplayDiv.setAttribute('data-valid-pwd','false'); } else { refreshAll(true,true); } },300); }
+            function clearUsernameMemory(){ localStorage.removeItem('daily_pwd_username'); usernameInput.value=''; passwordDisplayDiv.innerHTML='🌸 记忆已清除·输入新名字吧 🌸'; passwordDisplayDiv.setAttribute('data-valid-pwd','false'); passwordDisplayDiv.setAttribute('data-pwd-value',''); lastTriggeredWhitelistUser=""; showToast('🧹 用户名记忆已清除啦'); createFloatingHeart(window.innerWidth/2, window.innerHeight/2); }
+            
+            function initMainApp(){
+                const saved=localStorage.getItem('daily_pwd_username');
+                if(saved && saved.trim()!==""){
+                    usernameInput.value=saved; refreshAll(true,false);
+                } else { todayDateSpan.innerText=getTodayDateStr(); passwordDisplayDiv.innerHTML='💕 输入你的名字，生成今日密码 💕'; passwordDisplayDiv.setAttribute('data-valid-pwd','false'); usernameInput.value=''; }
+                usernameInput.addEventListener('input', onUsernameInput);
+                copyBtn.addEventListener('click', copyCurrentPassword);
+                refreshDateBtn.addEventListener('click', ()=>{ forceRegenerate(true); showToast('✨ 已刷新为最新日期密码 ✨'); });
+                manualGenBtn.addEventListener('click', ()=>{ forceRegenerate(true); showToast('🐾 已同步最新密码～'); });
+                clearMemoryBtn.addEventListener('click', clearUsernameMemory);
+                addButtonEffect(copyBtn); addButtonEffect(refreshDateBtn); addButtonEffect(manualGenBtn); addButtonEffect(clearMemoryBtn);
+            }
+            window.addEventListener('focus',()=>{ if(mainCard.classList.contains('active')){ const real=getTodayDateStr(); if(todayDateSpan.innerText !== real) forceRegenerate(false); } });
+            
+            // 绑定游戏按钮事件
+            clearExprBtn.addEventListener('click', () => { clearExpression(); createFloatingHeart(window.innerWidth/2, window.innerHeight/2); });
+            backspaceBtn.addEventListener('click', () => { backspaceExpression(); createFloatingHeart(window.innerWidth/2, window.innerHeight/2); });
+            verifyGameBtn.addEventListener('click', handleVerify);
+            // 重置所有挑战 (reset从头)
+            const resetBtn = document.createElement('button'); // 没有重置游戏按钮原来有，但界面中已有resetGameBtn不存在？ 重新加一个重置按钮在action-row?
+            // 为了体验，增加一个重置挑战按钮到 action-row? 在action-row里增加“重来”按钮吧，直接在js动态添加
+            const resetChallengeBtn = document.createElement('button');
+            resetChallengeBtn.className = 'game-btn btn-clear';
+            resetChallengeBtn.innerText = '🔄 重头挑战';
+            resetChallengeBtn.addEventListener('click', () => { resetChallenge(); });
+            document.querySelector('.action-row')?.appendChild(resetChallengeBtn);
+            addButtonEffect(clearExprBtn); addButtonEffect(backspaceBtn); addButtonEffect(verifyGameBtn); addButtonEffect(resetChallengeBtn);
+            
+            // 启动游戏（覆盖层）
+            initGameVerification();
+        })();
+    </script>
+</body>
+</html>

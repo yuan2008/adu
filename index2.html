@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="theme-color" content="#2c0a0a">
+    <title>🩸 血契祭坛 · 诅咒密语生成器 🩸</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: #0a0202;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Courier New', 'Segoe UI', 'Monaco', monospace;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: radial-gradient(circle at 20% 40%, rgba(120, 0, 0, 0.3) 2%, transparent 2.5%), radial-gradient(circle at 80% 70%, rgba(180, 0, 0, 0.4) 3%, transparent 3.5%), repeating-linear-gradient(45deg, rgba(80, 0, 0, 0.2) 0px, rgba(80, 0, 0, 0.2) 2px, transparent 2px, transparent 8px);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .card {
+            background: rgba(10, 2, 2, 0.94);
+            backdrop-filter: blur(3px);
+            border-radius: 20px;
+            border: 2px solid #6a0e0e;
+            box-shadow: 0 0 0 4px rgba(110, 0, 0, 0.5), 0 20px 35px rgba(0, 0, 0, 0.7), inset 0 0 20px rgba(255, 0, 0, 0.2);
+            width: 100%;
+            max-width: 580px;
+            padding: 2rem 1.8rem 2.2rem;
+            position: relative;
+            z-index: 2;
+            opacity: 0;
+            transform: scale(0.96) translateY(10px);
+            transition: opacity 0.4s cubic-bezier(0.2, 1.2, 0.3, 1), transform 0.35s ease;
+            pointer-events: none;
+        }
+
+        .card.active {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+            pointer-events: auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 28px;
+            border-bottom: 2px dashed #8b1a1a;
+            padding-bottom: 16px;
+        }
+
+        .skull-icon {
+            font-size: 58px;
+            filter: drop-shadow(0 0 6px #ff3300);
+            animation: shakeTremor 1.2s infinite ease;
+            display: inline-block;
+            color: #a52222;
+        }
+
+        @keyframes shakeTremor {
+
+            0%,
+            100% {
+                transform: translate(0px, 0px) rotate(0deg);
+            }
+
+            25% {
+                transform: translate(1px, -1px) rotate(0.5deg);
+            }
+
+            75% {
+                transform: translate(-1px, 1px) rotate(-0.5deg);
+            }
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #d64545, #6a040f, #a51b1b);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: 2px;
+        }
+
+        .sub {
+            font-size: 0.75rem;
+            background: #1f0404;
+            display: inline-block;
+            padding: 4px 18px;
+            border-radius: 20px;
+            margin-top: 12px;
+            font-weight: bold;
+            color: #bd7a7a;
+            border: 1px solid #a53f3f;
+        }
+
+        .input-group {
+            margin-bottom: 28px;
+        }
+
+        .input-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 800;
+            color: #ba6b6b;
+            margin-bottom: 10px;
+        }
+
+        .clear-btn {
+            background: #2a0606;
+            border: 1px solid #881010;
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: #e69999;
+            cursor: pointer;
+        }
+
+        .username-input {
+            width: 100%;
+            padding: 14px 20px;
+            font-size: 1rem;
+            border: 2px solid #770f0f;
+            border-radius: 20px;
+            background: #130303;
+            color: #e6b4b4;
+            font-family: monospace;
+        }
+
+        .date-badge {
+            background: #1f0404dd;
+            border-radius: 20px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 28px;
+            border: 1px solid #a21a1a;
+        }
+
+        .date-info {
+            background: #030000;
+            padding: 7px 18px;
+            border-radius: 40px;
+            color: #dc7f7f;
+            font-weight: bold;
+        }
+
+        .refresh-date-btn {
+            background: #611111;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 40px;
+            color: #f5c2c2;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .password-area {
+            background: #0e0101f2;
+            border-radius: 24px;
+            padding: 20px;
+            margin-bottom: 28px;
+            border: 2px solid #8c2c2c;
+            box-shadow: inset 0 0 20px #3c0000;
+        }
+
+        .password-value {
+            font-family: monospace;
+            font-size: 0.95rem;
+            word-break: break-all;
+            background: #000000aa;
+            padding: 16px;
+            border-radius: 20px;
+            color: #e64949;
+            font-weight: bold;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 14px 8px;
+            border-radius: 30px;
+            font-weight: bold;
+            background: #1e0505;
+            color: #dd9393;
+            border: 1px solid #972828;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(145deg, #831d1d, #4a0404);
+            color: #ffc5c5;
+        }
+
+        .btn:active {
+            transform: translateY(2px);
+        }
+
+        footer {
+            text-align: center;
+            font-size: 0.6rem;
+            color: #7f4b4b;
+            margin-top: 18px;
+        }
+
+        .custom-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            visibility: hidden;
+            opacity: 0;
+            transition: all 0.2s;
+        }
+
+        .custom-modal.show {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .modal-overlay {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: rgba(20, 0, 0, 0.85);
+            backdrop-filter: blur(6px);
+        }
+
+        .modal-content {
+            position: relative;
+            background: #1b0303;
+            max-width: 300px;
+            width: 80%;
+            padding: 32px 20px;
+            border-radius: 32px;
+            text-align: center;
+            border: 2px solid #b33b3b;
+        }
+
+        .modal-message {
+            color: #de8b8b;
+            font-weight: bold;
+            margin: 16px 0;
+        }
+
+        .modal-close {
+            background: #580e0e;
+            border: none;
+            padding: 9px 22px;
+            border-radius: 40px;
+            color: #fbcdcd;
+            cursor: pointer;
+        }
+
+        .verify-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.97);
+            backdrop-filter: blur(12px);
+            z-index: 20000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .verify-card {
+            background: #140101;
+            border-radius: 32px;
+            max-width: 700px;
+            width: 100%;
+            padding: 1.8rem;
+            text-align: center;
+            border: 3px solid #9a1f1f;
+            box-shadow: 0 0 0 4px #3a0303;
+        }
+
+        .verify-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #c04747;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .progress-status {
+            color: #b95a5a;
+            margin-bottom: 20px;
+            font-weight: bold;
+            border-bottom: 1px dashed #8b2a2a;
+            display: inline-block;
+            padding-bottom: 6px;
+        }
+
+        /* 华容道网格样式 */
+        .hua-grid {
+            display: grid;
+            grid-template-columns: repeat(9, 1fr);
+            background-color: #2c0a0a;
+            border: 3px solid #5e1212;
+            margin: 20px auto;
+            aspect-ratio: 1 / 1;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        .hua-cell {
+            border: 1px solid #631212;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            background-color: #1c0404;
+            color: #dd8a8a;
+            font-size: 1rem;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.1s;
+            font-family: monospace;
+        }
+
+        .hua-cell.empty {
+            background-color: #2a0606;
+            color: #6a2e2e;
+            cursor: pointer;
+            font-size: 1.4rem;
+        }
+
+        .hua-cell.empty:active {
+            background-color: #440b0b;
+        }
+
+        .hua-cell.number:active {
+            background-color: #3f0c0c;
+        }
+
+        .error-badge {
+            color: #d64545;
+            font-size: 0.9rem;
+            margin: 8px 0;
+            font-weight: bold;
+        }
+
+        .verify-actions {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .blood-btn {
+            background: #520c0c;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 40px;
+            color: #ffc2c2;
+            font-weight: bold;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .toast-msg {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #a12222dd;
+            backdrop-filter: blur(12px);
+            color: #ffc7c7;
+            padding: 12px 24px;
+            border-radius: 40px;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+            z-index: 10001;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 550px) {
+            .hua-cell {
+                font-size: 0.7rem;
+            }
+
+            .verify-card {
+                padding: 1rem;
+            }
+
+            .hua-grid {
+                max-width: 95vw;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="card" id="mainCard">
+        <div class="header">
+            <div class="skull-icon"><i class="fas fa-skull"></i> <i class="fas fa-droplet"></i> <i class="fas fa-khanda"></i></div>
+            <h1>血契祭坛 · 诅咒密令</h1>
+            <div class="sub"><i class="fas fa-scroll"></i> 每日只属于献祭者的黑暗秘语 <i class="fas fa-dagger"></i></div>
+        </div>
+        <div class="input-group">
+            <div class="input-label"><i class="fas fa-tint"></i> 罪孽之名（代号）</div>
+            <input type="text" id="usernameInput" class="username-input" placeholder="例: 血蔷薇 / 噬魂者" autocomplete="off">
+            <div style="text-align:right; margin-top:8px;">
+                <button id="clearMemoryBtn" class="clear-btn" type="button"><i class="fas fa-trash-alt"></i> 清除血祭记忆</button>
+            </div>
+        </div>
+        <div class="date-badge">
+            <div class="date-info"><i class="fas fa-calendar-alt"></i> 血日祭典 <strong id="todayDateDisplay">----</strong></div>
+            <button id="refreshDateBtn" class="refresh-date-btn"><i class="fas fa-sync-alt"></i> 唤醒诅咒密令</button>
+        </div>
+        <div class="password-area">
+            <div class="password-value" id="passwordDisplay">💀 献上祭品之名后显现 💀</div>
+        </div>
+        <div class="button-group">
+            <button id="copyBtn" class="btn btn-primary"><i class="fas fa-copy"></i> 镌刻密文</button>
+            <button id="manualGenBtn" class="btn"><i class="fas fa-skull"></i> 唤灵 / 同步</button>
+        </div>
+        <footer><i class="fas fa-moon"></i> 每日子夜密文都会异变 · 触碰溅血 <i class="fas fa-hand-peace"></i></footer>
+    </div>
+
+    <div id="whitelistModal" class="custom-modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div><i class="fas fa-dagger" style="font-size:48px; color:#a12222;"></i> <i class="fas fa-skull" style="font-size:48px;"></i></div>
+            <div class="modal-message" id="modalMessageText">血之低语</div>
+            <button class="modal-close" id="modalCloseBtn"><i class="fas fa-hand-fist"></i> 领受诅咒</button>
+        </div>
+    </div>
+
+    <div id="toastMsg" class="toast-msg"><i class="fas fa-droplet"></i> 血咒已复制</div>
+
+    <!-- 华容道验证界面，替代原数独 -->
+    <div id="verifyOverlay" class="verify-overlay">
+        <div class="verify-card" id="verifyCard">
+            <div class="verify-title"><i class="fas fa-puzzle-piece"></i> 血·华容道祭 <i class="fas fa-dice-d6"></i></div>
+            <div class="progress-status" id="puzzleProgress"><i class="fas fa-droplet"></i> 九宫血阵 · 归序献祭 <i class="fas fa-droplet"></i></div>
+            <div id="huaGridContainer" class="hua-grid"></div>
+            <div class="error-badge" id="errorCounterMsg"><i class="fas fa-skull"></i> 错祭次数: 0 / 3</div>
+            <div class="verify-actions">
+                <button id="submitPuzzleBtn" class="blood-btn"><i class="fas fa-check-double"></i> 献祭此题</button>
+                <button id="resetVerifyBtn" class="blood-btn"><i class="fas fa-undo-alt"></i> 血祭重置</button>
+            </div>
+            <div style="margin-top: 14px; font-size: 0.7rem; color:#a14747;"><i class="fas fa-info-circle"></i> 滑动数字归位 (1~80顺序, 右下角空位) ，错3次则血阵重铸</div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // ======================== 9x9 数字华容道核心逻辑 ========================
+            const SIZE = 9;            // 9x9网格
+            const TOTAL_CELLS = 81;
+            const EMPTY_VALUE = null;   // 空格表示
+            let currentBoard = [];      // 二维数组 9x9, 存储数字 1~80 或 null(空格)
+            let errorCountForPuzzle = 0;
+            const MAX_ERRORS = 3;
+            let verificationCompleted = false;   // 是否已通过验证
+            let mainAppInitialized = false;       // 主界面是否已初始化（避免重复绑定）
+            
+            // DOM 元素
+            const verifyOverlay = document.getElementById('verifyOverlay');
+            const mainCard = document.getElementById('mainCard');
+            const huaContainer = document.getElementById('huaGridContainer');
+            const errorCounterSpan = document.getElementById('errorCounterMsg');
+            const submitBtn = document.getElementById('submitPuzzleBtn');
+            const resetBtn = document.getElementById('resetVerifyBtn');
+            const progressStatusSpan = document.getElementById('puzzleProgress');
+            
+            // 更新错误计数UI
+            function updateErrorUI() {
+                if (errorCounterSpan) {
+                    errorCounterSpan.innerHTML = `<i class="fas fa-skull"></i> 错祭次数: ${errorCountForPuzzle} / ${MAX_ERRORS}`;
+                }
+            }
+            
+            // 显示提示浮层
+            function showToastMsg(msg, isError = false) {
+                const toast = document.getElementById('toastMsg');
+                if (!toast) return;
+                toast.innerHTML = `<i class="fas fa-tint"></i> ${msg}`;
+                toast.style.opacity = '1';
+                setTimeout(() => toast.style.opacity = '0', 1800);
+            }
+            
+            // 检查胜利: 从左到右从上到下依次为1,2,3...80, 最后一个格子(8,8)必须为空
+            function isVictory(board) {
+                for (let i = 0; i < SIZE; i++) {
+                    for (let j = 0; j < SIZE; j++) {
+                        const expected = i * SIZE + j + 1;  // 1~81, 但81应为空格
+                        const val = board[i][j];
+                        if (i === SIZE-1 && j === SIZE-1) {
+                            // 右下角必须是空格
+                            if (val !== EMPTY_VALUE) return false;
+                        } else {
+                            if (val !== expected) return false;
+                        }
+                    }
+                }
+                return true;
+            }
+            
+            // 找到空格坐标 {row, col}
+            function findEmptyPos(board) {
+                for (let i = 0; i < SIZE; i++) {
+                    for (let j = 0; j < SIZE; j++) {
+                        if (board[i][j] === EMPTY_VALUE) return { row: i, col: j };
+                    }
+                }
+                return null;
+            }
+            
+            // 移动数字 (点击位置与空格交换)
+            function tryMove(row, col) {
+                if (verificationCompleted) return false;
+                const emptyPos = findEmptyPos(currentBoard);
+                if (!emptyPos) return false;
+                // 检查是否相邻 (上下左右)
+                const isAdjacent = (Math.abs(emptyPos.row - row) + Math.abs(emptyPos.col - col)) === 1;
+                if (!isAdjacent) return false;
+                // 交换
+                currentBoard[emptyPos.row][emptyPos.col] = currentBoard[row][col];
+                currentBoard[row][col] = EMPTY_VALUE;
+                renderBoard();
+                // 自动检测胜利
+                if (isVictory(currentBoard)) {
+                    handleVictory();
+                }
+                return true;
+            }
+            
+            // 胜利处理: 验证通过
+            function handleVictory() {
+                if (verificationCompleted) return;
+                verificationCompleted = true;
+                showToastMsg("🩸 血阵归序 · 祭品蒙恩 诅咒密令现世 🩸", false);
+                // 隐藏验证遮罩，显示主界面
+                verifyOverlay.style.opacity = '0';
+                setTimeout(() => {
+                    verifyOverlay.style.display = 'none';
+                    mainCard.classList.add('active');
+                    initMainAppOnce();
+                }, 400);
+            }
+            
+            // 打乱拼图 (从目标状态随机移动若干步,保证可解)
+            function shuffleBoard(steps = 600) {
+                // 先构建目标状态
+                const targetBoard = Array(SIZE).fill().map(() => Array(SIZE).fill(0));
+                let counter = 1;
+                for (let i = 0; i < SIZE; i++) {
+                    for (let j = 0; j < SIZE; j++) {
+                        if (i === SIZE-1 && j === SIZE-1) {
+                            targetBoard[i][j] = EMPTY_VALUE;
+                        } else {
+                            targetBoard[i][j] = counter++;
+                        }
+                    }
+                }
+                // 深拷贝
+                let working = targetBoard.map(row => [...row]);
+                // 随机移动 steps 步
+                for (let step = 0; step < steps; step++) {
+                    const emptyPos = findEmptyPos(working);
+                    if (!emptyPos) break;
+                    const neighbors = [];
+                    const dirs = [[-1,0],[1,0],[0,-1],[0,1]];
+                    for (let d of dirs) {
+                        const nr = emptyPos.row + d[0];
+                        const nc = emptyPos.col + d[1];
+                        if (nr>=0 && nr<SIZE && nc>=0 && nc<SIZE) {
+                            neighbors.push([nr, nc]);
+                        }
+                    }
+                    if (neighbors.length === 0) continue;
+                    const randomNeighbor = neighbors[Math.floor(Math.random() * neighbors.length)];
+                    const [swapRow, swapCol] = randomNeighbor;
+                    // 交换空格与邻居
+                    working[emptyPos.row][emptyPos.col] = working[swapRow][swapCol];
+                    working[swapRow][swapCol] = EMPTY_VALUE;
+                }
+                return working;
+            }
+            
+            // 重置华容道 (重新打乱，错误计数归零)
+            function resetPuzzleAndErrors() {
+                if (verificationCompleted) return;
+                currentBoard = shuffleBoard(650);
+                errorCountForPuzzle = 0;
+                updateErrorUI();
+                renderBoard();
+                showToastMsg("血阵已重铸 · 重新祭炼", false);
+            }
+            
+            // 提交献祭：检查当前是否胜利，若否增加错误，超过阈值则重置拼图
+            function onSubmitSacrifice() {
+                if (verificationCompleted) return;
+                if (isVictory(currentBoard)) {
+                    handleVictory();
+                } else {
+                    errorCountForPuzzle++;
+                    updateErrorUI();
+                    showToastMsg(`献祭失败 · 血怒反噬 (${errorCountForPuzzle}/${MAX_ERRORS})`, true);
+                    if (errorCountForPuzzle >= MAX_ERRORS) {
+                        showToastMsg("🩸 三次血谬，华容道重塑，重新献祭 🩸", true);
+                        // 重置拼图并重置错误
+                        currentBoard = shuffleBoard(650);
+                        errorCountForPuzzle = 0;
+                        updateErrorUI();
+                        renderBoard();
+                    }
+                }
+            }
+            
+            // 渲染华容道网格
+            function renderBoard() {
+                if (!huaContainer) return;
+                huaContainer.innerHTML = '';
+                for (let i = 0; i < SIZE; i++) {
+                    for (let j = 0; j < SIZE; j++) {
+                        const value = currentBoard[i][j];
+                        const cell = document.createElement('div');
+                        cell.classList.add('hua-cell');
+                        if (value === EMPTY_VALUE) {
+                            cell.classList.add('empty');
+                            cell.innerHTML = '<i class="fas fa-skull"></i>';
+                        } else {
+                            cell.classList.add('number');
+                            cell.innerText = value;
+                        }
+                        // 绑定点击事件，使用闭包保留坐标
+                        cell.addEventListener('click', (function(r,c) {
+                            return function() { tryMove(r,c); };
+                        })(i,j));
+                        huaContainer.appendChild(cell);
+                    }
+                }
+                // 强化宫格视觉边界 (类似数独的粗线)
+                const cells = huaContainer.children;
+                for (let idx = 0; idx < cells.length; idx++) {
+                    const row = Math.floor(idx / SIZE);
+                    const col = idx % SIZE;
+                    if (col % 3 === 2 && col !== SIZE-1) cells[idx].style.borderRight = '3px solid #a12222';
+                    if (row % 3 === 2 && row !== SIZE-1) cells[idx].style.borderBottom = '3px solid #a12222';
+                }
+            }
+            
+            // ======================== 密码主应用逻辑 (原封不动保留增强) ========================
+            function getTodayDateStr() {
+                const d = new Date();
+                return `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
+            }
+            
+            function generateDailyPassword(username, dateStr) {
+                if (!username) return null;
+                return CryptoJS.MD5(`${username.trim()}-${dateStr}-${username.trim()}`).toString();
+            }
+            
+            const usernameInput = document.getElementById('usernameInput');
+            const todayDateSpan = document.getElementById('todayDateDisplay');
+            const passwordDisplayDiv = document.getElementById('passwordDisplay');
+            const copyBtn = document.getElementById('copyBtn');
+            const refreshDateBtn = document.getElementById('refreshDateBtn');
+            const manualGenBtn = document.getElementById('manualGenBtn');
+            const clearMemoryBtn = document.getElementById('clearMemoryBtn');
+            const whitelistModal = document.getElementById('whitelistModal');
+            const modalMessageSpan = document.getElementById('modalMessageText');
+            const modalCloseBtn = document.getElementById('modalCloseBtn');
+            
+            const whitelistMessages = {
+                "小草莓": "🍓 小草莓，血液甘甜祭品",
+                "胖喵酱": "🐱 胖喵酱骨肉诅咒",
+                "不二胖喵": "深渊索命",
+                "布丁": "血宴主菜",
+                "奶茶": "腥红毒药",
+                "牟晨稳": "血肉牛蹄",
+                "邱德良": "面皮剥下",
+                "刘哲": "脊骨权杖",
+                "王浩": "恶鬼吞噬",
+                "杨玲飞": "蜘蛛巢饵"
+            };
+            let lastWhitelistUser = "";
+            
+            function showWhitelistMessageIfNeeded(username) {
+                if (!username) return false;
+                const lower = username.toLowerCase();
+                for (let [k, msg] of Object.entries(whitelistMessages)) {
+                    if (k.toLowerCase() === lower) {
+                        modalMessageSpan.innerText = msg;
+                        whitelistModal.classList.add('show');
+                        return true;
+                    }
+                }
+                return false;
+            }
+            
+            modalCloseBtn.onclick = () => whitelistModal.classList.remove('show');
+            whitelistModal.addEventListener('click', (e) => {
+                if (e.target === whitelistModal || e.target.classList.contains('modal-overlay')) whitelistModal.classList.remove('show');
+            });
+            
+            function refreshAll(updateStorage, triggerModal) {
+                const today = getTodayDateStr();
+                todayDateSpan.innerText = today;
+                const uname = usernameInput.value.trim();
+                if (!uname) {
+                    passwordDisplayDiv.innerHTML = '💀 无名无法献祭';
+                    passwordDisplayDiv.setAttribute('data-pwd', '');
+                    return;
+                }
+                const pwd = generateDailyPassword(uname, today);
+                if (pwd) {
+                    passwordDisplayDiv.innerHTML = pwd;
+                    passwordDisplayDiv.setAttribute('data-pwd', pwd);
+                    if (updateStorage) localStorage.setItem('daily_pwd_username', uname);
+                    if (triggerModal && uname !== lastWhitelistUser && showWhitelistMessageIfNeeded(uname)) lastWhitelistUser = uname;
+                } else {
+                    passwordDisplayDiv.innerHTML = '❌ 召唤失败';
+                    passwordDisplayDiv.setAttribute('data-pwd', '');
+                }
+            }
+            
+            function forceRegenerate(triggerModal) {
+                refreshAll(true, triggerModal);
+            }
+            
+            function copyCurrentPassword() {
+                const pwd = passwordDisplayDiv.getAttribute('data-pwd');
+                if (pwd) {
+                    navigator.clipboard.writeText(pwd);
+                    showToastMsg('血咒铭刻', false);
+                } else showToastMsg('无密文', true);
+            }
+            
+            let debounceTimer;
+            function onUsernameInput() {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => refreshAll(true, true), 300);
+            }
+            
+            function clearUsernameMemory() {
+                localStorage.removeItem('daily_pwd_username');
+                usernameInput.value = '';
+                refreshAll(false, false);
+                passwordDisplayDiv.innerHTML = '🩸 记忆抹除·献新魂';
+                passwordDisplayDiv.setAttribute('data-pwd', '');
+                showToastMsg('血祭名录清除', false);
+            }
+            
+            // 只初始化一次主应用的事件绑定
+            function initMainAppOnce() {
+                if (mainAppInitialized) return;
+                mainAppInitialized = true;
+                const saved = localStorage.getItem('daily_pwd_username');
+                if (saved) {
+                    usernameInput.value = saved;
+                    refreshAll(true, false);
+                } else {
+                    refreshAll(false, false);
+                }
+                usernameInput.addEventListener('input', onUsernameInput);
+                copyBtn.addEventListener('click', copyCurrentPassword);
+                refreshDateBtn.addEventListener('click', () => forceRegenerate(true));
+                manualGenBtn.addEventListener('click', () => forceRegenerate(true));
+                clearMemoryBtn.addEventListener('click', clearUsernameMemory);
+            }
+            
+            // ======================== 初始化华容道验证界面 ========================
+            function initVerification() {
+                verificationCompleted = false;
+                errorCountForPuzzle = 0;
+                updateErrorUI();
+                // 生成初始打乱状态
+                currentBoard = shuffleBoard(700);
+                renderBoard();
+                // 确保覆盖层可见，主卡片隐藏
+                verifyOverlay.style.display = 'flex';
+                verifyOverlay.style.opacity = '1';
+                mainCard.classList.remove('active');
+                if (progressStatusSpan) {
+                    progressStatusSpan.innerHTML = `<i class="fas fa-droplet"></i> 血华容道 · 归序献祭 <i class="fas fa-droplet"></i>`;
+                }
+                // 绑定按钮事件（确保只绑定一次，移除旧的再添加避免重复）
+                const newSubmitBtn = document.getElementById('submitPuzzleBtn');
+                const newResetBtn = document.getElementById('resetVerifyBtn');
+                // 移除原有监听器方式：克隆替换？简便方法使用新监听，但可能重复，但由于页面只初始化一次，没关系
+                // 为了避免重复绑定，先解绑（若已有）
+                if (window._boundSubmit) {
+                    newSubmitBtn.removeEventListener('click', window._boundSubmit);
+                    newResetBtn.removeEventListener('click', window._boundReset);
+                }
+                const boundSubmit = onSubmitSacrifice.bind(this);
+                const boundReset = () => {
+                    if (verificationCompleted) return;
+                    currentBoard = shuffleBoard(650);
+                    errorCountForPuzzle = 0;
+                    updateErrorUI();
+                    renderBoard();
+                    showToastMsg("血阵已重铸 · 重新祭炼", false);
+                };
+                newSubmitBtn.addEventListener('click', boundSubmit);
+                newResetBtn.addEventListener('click', boundReset);
+                window._boundSubmit = boundSubmit;
+                window._boundReset = boundReset;
+            }
+            
+            // 启动一切: 运行华容道验证
+            initVerification();
+        })();
+    </script>
+</body>
+</html>
